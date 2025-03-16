@@ -8,6 +8,11 @@ import ru.ddc.exp_01.dto.Response;
 @RestController
 public class AbcController {
 
+    /**
+     * Method for test rest-api.
+     *
+     * @return the Response.
+     */
     @GetMapping
     public ResponseEntity<Response> hello() {
         return ResponseEntity.ok(new Response(1, "Hello World"));

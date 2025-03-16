@@ -25,6 +25,8 @@ jobs:
 
       - name: run checkstyle
         run: ./mvnw checkstyle:check
+        with:
+          cache: maven
 
       - name: build with maven
         run: ./mvnw -B package --file pom.xml

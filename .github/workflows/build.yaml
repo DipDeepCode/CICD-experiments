@@ -18,16 +18,21 @@ jobs:
         with:
           java-version: '17'
           distribution: 'temurin'
-          cache: maven
+#          cache: maven
 
       - name: make mvnw executable
         run: chmod +x mvnw
 
       - name: run checkstyle
         run: ./mvnw checkstyle:check
-        with:
-          cache: maven
 
       - name: build with maven
         run: ./mvnw -B package --file pom.xml
 
+      - name: cache maven packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-m2-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-m2-

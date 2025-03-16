@@ -16,6 +16,9 @@ public class Exp01Application {
         SpringApplication.run(Exp01Application.class, args);
     }
 
+    /**
+     * JavaDoc.
+     */
     public void doNotExecute() {
         throw new RuntimeException();
     }

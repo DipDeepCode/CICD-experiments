@@ -17,7 +17,7 @@ public class Exp01Application {
     }
 
     /**
-     * JavaDoc.
+     * JavaDoc  .
      */
     public void doNotExecute() {
         throw new RuntimeException();

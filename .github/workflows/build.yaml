@@ -20,6 +20,12 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
+      - name: make mvnw executable
+        run: chmod +x mvnw
+
+      - name: run checkstyle
+        run: ./mvnw checkstyle:check
+
       - name: build with maven
-        run: mvn -B package --file pom.xml
+        run: ./mvnw -B package --file pom.xml
 

@@ -6,7 +6,8 @@ on:
       - master
 
 jobs:
-  build:
+  build-and-push:
+    name: build-and-push
     runs-on: ubuntu-20.04
 
     steps:
@@ -35,11 +36,7 @@ jobs:
         run: ./mvnw -B package --file pom.xml
 
       - name: build docker image
-        run: docker build -t dipdeepcode/exp_01:latest .
-
-#      - name: login to docker hub
-#        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-#DOCKER_HUB_TOKEN
+        run: docker build -t ${{ vars.DOCKERHUB_USERNAME }}/exp_01:latest .
 
       - name: login to docker hub
         uses: docker/login-action@v3
@@ -48,5 +45,30 @@ jobs:
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: push docker image
-        run: docker push dipdeepcode/exp_01:latest
+        run: docker push ${{ vars.DOCKERHUB_USERNAME }}/exp_01:latest
 
+  deploy:
+    name: deploy
+    runs-on: ubuntu-20.04
+    needs: build-and-push
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+      - name: install ssh keys
+        run: |
+          install -m 600 -D /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SSH_HOST }} > ~/.ssh/known_hosts
+      - name: create docker compose config
+        run: |
+          cat compose.yml | envsubst > docker-compose-secret.yml
+      - name: copy docker compose config
+        run: scp docker-compose-secret.yml ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:docker-compose.yml
+      - name: connect and pull
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "docker-compose pull && docker-compose up -d && exit"
+      - name: cleanup config
+        if: always()
+        run: ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "rm docker-compose.yml"
+      - name: cleanup keys
+        if: always()
+        run: rm -rf ~/.ssh docker-compose-secret.yml

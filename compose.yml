@@ -1,0 +1,6 @@
+services:
+  exp_1:
+    container_name: exp_1
+    image: dipdeepcode/exl_1:latest
+    ports:
+      - "8888:8080"
